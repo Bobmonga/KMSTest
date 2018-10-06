@@ -1,0 +1,20 @@
+language: csharp
+os: linux
+dist: trusty
+sudo: required
+dotnet: 2.0.0
+mono: none
+env: DOTNETCORE=1
+services:
+  - docker
+addons:
+  apt:
+    packages:
+      - docker-ce
+script:
+  - chmod +x ./deploy-envs.sh
+  - chmod +x ./scripts/build.sh
+  - chmod +x ./scripts/deploy.sh
+  - cd scripts && ./build.sh
+  - sudo apt-get -y install --allow-downgrades -o Dpkg::Options::="--force-confnew" docker-ce=18.03.0~ce-0~ubuntu;
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then ./deploy.sh; fi
