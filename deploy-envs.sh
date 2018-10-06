@@ -5,7 +5,7 @@ export IMAGE_NAME=netcoreapps
 export IMAGE_VERSION=latest
 
 export AWS_DEFAULT_REGION=eu-west-1
-export AWS_ECS_CLUSTER_NAME=DotNetCore
+export AWS_ECS_CLUSTER_NAME=Default
 export AWS_VIRTUAL_HOST=ec2-54-229-37-223.eu-west-1.compute.amazonaws.com
 
 # set any sensitive information in travis-ci encrypted project settings:
