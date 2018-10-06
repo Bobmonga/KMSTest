@@ -12,7 +12,7 @@
             "portMappings": [
                 {
                     "containerPort": 5000,
-                    "hostPort": 0,
+                    "hostPort": 80,
                     "protocol": "tcp"
                 }
             ],
@@ -20,23 +20,8 @@
                 {
                     "name": "VIRTUAL_HOST",
                     "value": "${AWS_VIRTUAL_HOST}"
-                },
-                {
-                    "name": "SERVICESTACK_LICENSE",
-                    "value": "${SERVICESTACK_LICENSE}"
-                },
-                {
-                    "name": "REDIS_HOST",
-                    "value": "${IMAGE_NAME}-redis"
                 }
             ]
-        },
-        {
-            "name": "${IMAGE_NAME}-redis",
-            "image": "redis:3.2",
-            "cpu": 128,
-            "memory": 128,
-            "essential": true
         }
     ]
 }
