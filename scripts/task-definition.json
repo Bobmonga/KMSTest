@@ -8,7 +8,6 @@
             "cpu": 128,
             "memory": 256,
             "essential": true,
-            "links": ["${IMAGE_NAME}-KMSTest"],
             "portMappings": [
                 {
                     "containerPort": 5000,
