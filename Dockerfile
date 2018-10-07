@@ -1,4 +1,4 @@
-FROM microsoft/aspnetcore-build:2.1 AS build-env
+FROM microsoft/aspnetcore-build AS build-env
 COPY src /app
 WORKDIR /app
 
