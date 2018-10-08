@@ -12,6 +12,6 @@ RUN dir -a
 # Build runtime image
 FROM microsoft/dotnet:2.1-runtime
 WORKDIR /app
-COPY --from=build-env /app/KMSTest/out .
+COPY --from=build-env /app/out .
 ENV ASPNETCORE_URLS http://*:5000
 ENTRYPOINT ["dotnet", "KMSTest.dll"]
