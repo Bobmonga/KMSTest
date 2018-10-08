@@ -1,4 +1,4 @@
-FROM microsoft/dotnet-buildtools-prereqs AS build-env
+FROM microsoft/microsoft/dotnet-framework-build AS build-env
 RUN dotnet --info
 COPY src /app
 WORKDIR /app
