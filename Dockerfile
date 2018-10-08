@@ -1,5 +1,5 @@
 FROM microsoft/aspnetcore-build AS build-env
-RUN dir
+RUN dotnet --info
 COPY src /app
 WORKDIR /app
 
