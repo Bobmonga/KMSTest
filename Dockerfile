@@ -1,4 +1,4 @@
-FROM microsoft/microsoft/dotnet-framework-build AS build-env
+FROM microsoft/microsoft/dotnet AS build-env
 RUN dotnet --info
 COPY src /app
 WORKDIR /app
