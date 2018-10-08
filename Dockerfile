@@ -6,6 +6,8 @@ WORKDIR /app
 RUN dotnet restore 
 #--configfile ../NuGet.Config
 RUN dotnet publish -c Release -o out
+RUN dir -a
+
 
 # Build runtime image
 FROM microsoft/dotnet:2.1-runtime
