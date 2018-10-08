@@ -1,4 +1,4 @@
-FROM microsoft/aspnetcore-build AS build-env
+FROM microsoft/microsoft/dotnet-buildtools-prereqs AS build-env
 RUN dotnet --info
 COPY src /app
 WORKDIR /app
@@ -8,7 +8,7 @@ RUN dotnet restore
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM microsoft/aspnetcore
+FROM microsoft/microsoft/dotnet
 WORKDIR /app
 COPY --from=build-env /app/KMSTest/out .
 ENV ASPNETCORE_URLS http://*:5000
