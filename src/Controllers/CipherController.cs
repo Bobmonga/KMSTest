@@ -16,25 +16,43 @@ namespace KMSTest.Controllers
     [ApiController]
     public class CipherController : ControllerBase
     {
-        BasicAWSCredentials _credentials;
-        AmazonKeyManagementServiceConfig _kmsConfig;
-
         public CipherController()
         {
-            _credentials = new BasicAWSCredentials("AKIAIBBB5AMKSV6RSIPQ", "OZLBck0u3tom3r9BHHuLMXlX6NJILNLem/zb9ip7");
-            _kmsConfig = new AmazonKeyManagementServiceConfig();
-            _kmsConfig.RegionEndpoint = RegionEndpoint.EUWest1;
         }
 
         // GET api/values/5
         [HttpGet("Encrypt/{plain}")]
-        public ActionResult<KeyResponse> Encrypt(string plain)
+        public ActionResult<string> Encrypt(string plain)
+        {
+            return plain;
+        }
+
+        // GET api/values/5
+        [HttpGet("CreateKey")]
+        public ActionResult<CreateKeyResponse> CreateKey()
+        {
+            using (var kms = new AmazonKeyManagementServiceClient())
+            {
+                CreateKeyRequest createKeyRequest = new CreateKeyRequest()
+                {
+                    Description = "TestCMK",                    
+                };
+
+                CreateKeyResponse createKeyResponse = kms.CreateKeyAsync(createKeyRequest).Result;
+
+                return createKeyResponse;
+            }
+        }
+
+        // GET api/values/5
+        [HttpGet("CreateDataKey/{keyId}")]
+        public ActionResult<KeyResponse> CreateDataKey(string keyId)
         {
             using (var kms = new AmazonKeyManagementServiceClient())
             {
                 GenerateDataKeyRequest generateDataKeyRequest = new GenerateDataKeyRequest()
                 {
-                    KeyId = "alias/TestCMK",
+                    KeyId = keyId,
                     KeySpec = DataKeySpec.AES_256
                 };
 
@@ -45,23 +63,6 @@ namespace KMSTest.Controllers
                 keyResponse.Cipher = Help.StreamToString(generateDataKeyResponse.CiphertextBlob);
 
                 return keyResponse;
-            }
-        }
-
-        // GET api/values/5
-        [HttpGet("CreateKey")]
-        public ActionResult<CreateKeyResponse> CreateKey(string keyId)
-        {
-            using (var kms = new AmazonKeyManagementServiceClient(_credentials, _kmsConfig))
-            {
-                CreateKeyRequest createKeyRequest = new CreateKeyRequest()
-                {
-                    Description = "TestCMK"
-                };
-
-                CreateKeyResponse createKeyResponse = kms.CreateKeyAsync(createKeyRequest).Result;
-
-                return createKeyResponse;
             }
         }
 
