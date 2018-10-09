@@ -30,7 +30,7 @@ namespace KMSTest.Controllers
         [HttpGet("Encrypt/{plain}")]
         public ActionResult<KeyResponse> Encrypt(string plain)
         {
-            using (var kms = new AmazonKeyManagementServiceClient(_credentials, _kmsConfig))
+            using (var kms = new AmazonKeyManagementServiceClient())
             {
                 GenerateDataKeyRequest generateDataKeyRequest = new GenerateDataKeyRequest()
                 {
