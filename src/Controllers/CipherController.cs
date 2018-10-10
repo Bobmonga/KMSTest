@@ -16,26 +16,14 @@ namespace KMSTest.Controllers
     [ApiController]
     public class CipherController : ControllerBase
     {
-        public CipherController()
-        {
-        }
-
-        // GET api/values/5
-        [HttpGet("Encrypt/{plain}")]
-        public ActionResult<string> Encrypt(string plain)
-        {
-            return plain;
-        }
-
-        // GET api/values/5
-        [HttpGet("CreateKey")]
-        public ActionResult<CreateKeyResponse> CreateKey()
+        [HttpGet("CreateKey/{description}")]
+        public ActionResult<CreateKeyResponse> CreateKey(string description)
         {
             using (var kms = new AmazonKeyManagementServiceClient())
             {
                 CreateKeyRequest createKeyRequest = new CreateKeyRequest()
                 {
-                    Description = "TestCMK",                    
+                    Description = description,                    
                 };
 
                 CreateKeyResponse createKeyResponse = kms.CreateKeyAsync(createKeyRequest).Result;
@@ -44,7 +32,61 @@ namespace KMSTest.Controllers
             }
         }
 
-        // GET api/values/5
+        [HttpGet("CreateAlias/{keyId}/{aliasName}")]
+        public ActionResult<CreateAliasResponse> CreateAlias(string keyId, string aliasName)
+        {
+            using (var kms = new AmazonKeyManagementServiceClient())
+            {
+                CreateAliasRequest createAliasRequest = new CreateAliasRequest()
+                {
+                    TargetKeyId = keyId,
+                    AliasName = "alias/" + aliasName
+                };
+ 
+                CreateAliasResponse createAliasResponse = kms.CreateAliasAsync(createAliasRequest).Result;
+
+                return createAliasResponse;
+            }
+        }
+
+        [HttpGet("PutKeyPolicy/{keyId}")]
+        public ActionResult<PutKeyPolicyResponse> PutKeyPolicy(string keyId)
+        {
+            using (var kms = new AmazonKeyManagementServiceClient())
+            {
+                PutKeyPolicyRequest putKeyPolicyRequest = new PutKeyPolicyRequest()
+                {
+                    KeyId = keyId,
+                    PolicyName = "default",
+                    Policy = "{" +
+                    "  \"Version\": \"2012-10-17\"," +
+                    "  \"Statement\": [" +
+                    "    {\"Sid\": \"Allow access for ecsRole\"," +
+                    "    \"Effect\": \"Allow\"," +
+                    "    \"Principal\": {\"AWS\": \"arn:aws:iam::313549930986:role/ecsRole\"}," +
+                    "    \"Action\": [" +
+                    "      \"kms:GenerateDataKey\"," +
+                    "      \"kms:Decrypt\"," +
+                    "      \"kms:Encrypt\"" +
+                    "    ]," +
+                    "    \"Resource\": \"*\"}," +
+                    "    {\"Sid\": \"Allow full admin access for root\"," +
+                    "    \"Effect\": \"Allow\"," +
+                    "    \"Principal\": {\"AWS\": \"arn:aws:iam::313549930986:root\"}," +
+                    "    \"Action\": [" +
+                    "      \"kms:*\"" +
+                    "    ]," +
+                    "    \"Resource\": \"*\"}" +
+                    "  ]" +
+                    "}"
+                };
+ 
+                PutKeyPolicyResponse putKeyPolicyResponse = kms.PutKeyPolicyAsync(putKeyPolicyRequest).Result;
+
+                return putKeyPolicyResponse;
+            }
+        }
+
         [HttpGet("CreateDataKey/{keyId}")]
         public ActionResult<KeyResponse> CreateDataKey(string keyId)
         {
@@ -66,8 +108,14 @@ namespace KMSTest.Controllers
             }
         }
 
-        [HttpGet("Decrypt/{cipher}")]
-        public ActionResult<string> Decrypt(string cipher)
+        [HttpGet("Encrypt/{dataKey}/{plain}")]
+        public ActionResult<string> Encrypt(string plain)
+        {
+            return plain;
+        }
+
+        [HttpGet("Decrypt/{dataKey}/{cipher}")]
+        public ActionResult<string> Decrypt(string dataKey, string cipher)
         {
             return cipher;
         }
