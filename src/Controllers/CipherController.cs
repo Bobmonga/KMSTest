@@ -137,34 +137,34 @@ static class Help
         Statement statementKeyUser = new Statement(Statement.StatementEffect.Allow);
         statementKeyUser.Id = "Allow access for EC2 role";
         statementKeyUser.Principals = new List<Principal>()
-                {
-                    new Principal(role)
-                };
+        {
+            new Principal($"arn:aws:iam::{accountId}:user/listUserRole")
+        };
         statementKeyUser.Actions = new List<ActionIdentifier>()
-                {
-                    new ActionIdentifier("kms:GenerateDataKey"),
-                    new ActionIdentifier("kms:Decrypt"),
-                    new ActionIdentifier("kms:Encrypt")
-                };
+        {
+            new ActionIdentifier("kms:GenerateDataKey"),
+            new ActionIdentifier("kms:Decrypt"),
+            new ActionIdentifier("kms:Encrypt")
+        };
         statementKeyUser.Resources = new List<Resource>
-                {
-                    new Resource($"arn:aws:kms:{region}:{accountId}:key/{keyId}")
-                };
+        {
+            new Resource($"arn:aws:kms:{region}:{accountId}:key/{keyId}")
+        };
 
         Statement statementAdmin = new Statement(Statement.StatementEffect.Allow);
         statementAdmin.Id = "Allow full admin access for root";
         statementAdmin.Principals = new List<Principal>()
-                {
-                    new Principal($"arn:aws:iam::{accountId}:root")
-                };
+        {
+            new Principal($"arn:aws:iam::{accountId}:root")
+        };
         statementAdmin.Actions = new List<ActionIdentifier>()
-                {
-                    new ActionIdentifier("kms:*"),
-                };
+        {
+            new ActionIdentifier("kms:*"),
+        };
         statementAdmin.Resources = new List<Resource>
-                {
-                    new Resource($"arn:aws:kms:{region}:{accountId}:key/{keyId}")
-                };
+        {
+            new Resource($"arn:aws:kms:{region}:{accountId}:key/{keyId}")
+        };
 
         //TODO - Add a condition?
         //statement.Conditions.Add(ConditionFactory..NewIpAddressCondition(ipAddress));
