@@ -138,7 +138,7 @@ static class Help
         statementKeyUser.Id = "Allow access for EC2 role";
         statementKeyUser.Principals = new List<Principal>()
         {
-            new Principal($"arn:aws:iam::{accountId}:role/listUserRole")
+            new Principal($"arn:aws:iam::{accountId}:role/ListUserRole")
         };
         statementKeyUser.Actions = new List<ActionIdentifier>()
         {
