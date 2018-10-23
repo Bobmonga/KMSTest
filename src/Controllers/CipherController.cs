@@ -19,37 +19,40 @@ namespace KMSTest.Controllers
     [ApiController]
     public class CipherController : ControllerBase
     {
+        IAmazonKeyManagementService _kmsClient;
+        IAmazonSecurityTokenService _stsClient;
+
+        public CipherController(IAmazonKeyManagementService kmsClient, IAmazonSecurityTokenService stsClient)
+        {
+            _kmsClient = kmsClient;
+            _stsClient = stsClient;
+        }
+
         [HttpGet("CreateKey/{description}")]
         public ActionResult<CreateKeyResponse> CreateKey(string description)
         {
-            using (var kms = new AmazonKeyManagementServiceClient())
+            CreateKeyRequest createKeyRequest = new CreateKeyRequest()
             {
-                CreateKeyRequest createKeyRequest = new CreateKeyRequest()
-                {
-                    Description = description,                    
-                };
+                Description = description,                    
+            };
 
-                CreateKeyResponse createKeyResponse = kms.CreateKeyAsync(createKeyRequest).Result;
+            CreateKeyResponse createKeyResponse = _kmsClient.CreateKeyAsync(createKeyRequest).Result;
 
-                return createKeyResponse;
-            }
+            return createKeyResponse;
         }
 
         [HttpGet("CreateAlias/{keyId}/{aliasName}")]
         public ActionResult<CreateAliasResponse> CreateAlias(string keyId, string aliasName)
         {
-            using (var kms = new AmazonKeyManagementServiceClient())
+            CreateAliasRequest createAliasRequest = new CreateAliasRequest()
             {
-                CreateAliasRequest createAliasRequest = new CreateAliasRequest()
-                {
-                    TargetKeyId = keyId,
-                    AliasName = "alias/" + aliasName
-                };
+                TargetKeyId = keyId,
+                AliasName = "alias/" + aliasName
+            };
  
-                CreateAliasResponse createAliasResponse = kms.CreateAliasAsync(createAliasRequest).Result;
+            CreateAliasResponse createAliasResponse = _kmsClient.CreateAliasAsync(createAliasRequest).Result;
 
-                return createAliasResponse;
-            }
+            return createAliasResponse;
         }
 
         [HttpGet("PutKeyPolicy/{keyId}")]
@@ -57,51 +60,42 @@ namespace KMSTest.Controllers
         {
             Policy policy;
 
-            using (var kms = new AmazonKeyManagementServiceClient())
+            GetCallerIdentityResponse getCallerIdentityResponse = _stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest()).Result;
+
+            policy = Help.GetPolicy(
+                _kmsClient.Config.RegionEndpoint.SystemName,
+                getCallerIdentityResponse.Account,
+                getCallerIdentityResponse.Arn,
+                keyId);
+
+            PutKeyPolicyRequest putKeyPolicyRequest = new PutKeyPolicyRequest()
             {
-                using (AmazonSecurityTokenServiceClient stsClient = new AmazonSecurityTokenServiceClient())
-                {
-                    GetCallerIdentityResponse getCallerIdentityResponse = stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest()).Result;
-
-                    policy = Help.GetPolicy(
-                        kms.Config.RegionEndpoint.SystemName,
-                        getCallerIdentityResponse.Account,
-                        getCallerIdentityResponse.Arn,
-                        keyId);
-                }
-
-                PutKeyPolicyRequest putKeyPolicyRequest = new PutKeyPolicyRequest()
-                {
-                    KeyId = keyId,
-                    PolicyName = "default",
-                    Policy = policy.ToJson()
-                };
+                KeyId = keyId,
+                PolicyName = "default",
+                Policy = policy.ToJson()
+            };
  
-                PutKeyPolicyResponse putKeyPolicyResponse = kms.PutKeyPolicyAsync(putKeyPolicyRequest).Result;
+            PutKeyPolicyResponse putKeyPolicyResponse = _kmsClient.PutKeyPolicyAsync(putKeyPolicyRequest).Result;
 
-                return putKeyPolicyResponse;
-            }
+            return putKeyPolicyResponse;
         }
 
         [HttpGet("CreateDataKey/{keyId}")]
         public ActionResult<KeyResponse> CreateDataKey(string keyId)
         {
-            using (var kms = new AmazonKeyManagementServiceClient())
+            GenerateDataKeyRequest generateDataKeyRequest = new GenerateDataKeyRequest()
             {
-                GenerateDataKeyRequest generateDataKeyRequest = new GenerateDataKeyRequest()
-                {
-                    KeyId = keyId,
-                    KeySpec = DataKeySpec.AES_256
-                };
+                KeyId = keyId,
+                KeySpec = DataKeySpec.AES_256
+            };
 
-                GenerateDataKeyResponse generateDataKeyResponse = kms.GenerateDataKeyAsync(generateDataKeyRequest).Result;
+            GenerateDataKeyResponse generateDataKeyResponse = _kmsClient.GenerateDataKeyAsync(generateDataKeyRequest).Result;
 
-                KeyResponse keyResponse = new KeyResponse();
-                keyResponse.Plain = Help.StreamToString(generateDataKeyResponse.Plaintext);
-                keyResponse.Cipher = Help.StreamToString(generateDataKeyResponse.CiphertextBlob);
+            KeyResponse keyResponse = new KeyResponse();
+            keyResponse.Plain = Help.StreamToString(generateDataKeyResponse.Plaintext);
+            keyResponse.Cipher = Help.StreamToString(generateDataKeyResponse.CiphertextBlob);
 
-                return keyResponse;
-            }
+            return keyResponse;
         }
 
         [HttpGet("Encrypt/{dataKey}/{plain}")]
